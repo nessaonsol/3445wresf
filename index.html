@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>larry</title>
+    <link rel="icon" type="image/x-icon" href="larry.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .creator-link {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .x-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #1DA1F2, #0d8bd9);
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 25px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(29, 161, 242, 0.3);
+        }
+
+        .x-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(29, 161, 242, 0.4);
+            background: linear-gradient(45deg, #0d8bd9, #1DA1F2);
+        }
+
+        .x-link:active {
+            transform: translateY(-1px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .canvas-area {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            min-width: 400px;
+        }
+
+        #stickFigureCanvas {
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            background: #f9f9f9;
+            cursor: crosshair;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .accessories-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            min-width: 300px;
+            max-width: 400px;
+        }
+
+        .accessories-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .accessory-category {
+            margin-bottom: 25px;
+        }
+
+        .category-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #ffeb3b;
+            border-bottom: 2px solid #ffeb3b;
+            padding-bottom: 5px;
+        }
+
+        .accessories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
+        }
+
+        .accessory {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            font-size: 2em;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            user-select: none;
+        }
+
+        .accessory:hover {
+            transform: scale(1.1);
+            background: white;
+            border-color: #ffeb3b;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .accessory:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .placed-accessory {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            z-index: 10;
+            font-size: 2em;
+            transition: transform 0.1s ease;
+        }
+
+        .placed-accessory:hover {
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 25px;
+            height: 25px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placed-accessory:hover .delete-btn {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .canvas-area {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            #stickFigureCanvas {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dress Larry Up</h1>
+        
+        <div class="creator-link">
+            <a href="https://x.com/yourusername" target="_blank" class="x-link">
+                🐦 Follow @yourusername
+            </a>
+        </div>
+        
+        <div class="main-content">
+            <div class="canvas-area">
+                <canvas id="stickFigureCanvas" width="400" height="500"></canvas>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="clearCanvas()">🗑️ Clear All</button>
+                    <button class="btn btn-secondary" onclick="downloadImage()">💾 Download</button>
+                    <button class="btn btn-success" onclick="shareToTwitter()">🐦 Tweet It!</button>
+                </div>
+            </div>
+
+            <div class="accessories-panel">
+                <h2 class="accessories-title">Drag & Drop Accessories</h2>
+                
+                <div class="accessory-category">
+                    <h3 class="category-title">Hats & Hair</h3>
+                    <div class="accessories-grid">
+                        <div class="accessory" draggable="true" data-accessory="🎩">🎩</div>
+                        <div class="accessory" draggable="true" data-accessory="👑">👑</div>
+                        <div class="accessory" draggable="true" data-accessory="🧢">🧢</div>
+                        <div class="accessory" draggable="true" data-accessory="🎓">🎓</div>
+                        <div class="accessory" draggable="true" data-accessory="💇">💇</div>
+                        <div class="accessory" draggable="true" data-accessory="🦱">🦱</div>
+                    </div>
+                </div>
+
+                <div class="accessory-category">
+                    <h3 class="category-title">Face & Eyes</h3>
+                    <div class="accessories-grid">
+                        <div class="accessory" draggable="true" data-accessory="😎">😎</div>
+                        <div class="accessory" draggable="true" data-accessory="🤓">🤓</div>
+                        <div class="accessory" draggable="true" data-accessory="🥸">🥸</div>
+                        <div class="accessory" draggable="true" data-accessory="😷">😷</div>
+                        <div class="accessory" draggable="true" data-accessory="👁️">👁️</div>
+                        <div class="accessory" draggable="true" data-accessory="👃">👃</div>
+                    </div>
+                </div>
+
+                <div class="accessory-category">
+                    <h3 class="category-title">Clothing</h3>
+                    <div class="accessories-grid">
+                        <div class="accessory" draggable="true" data-accessory="👔">👔</div>
+                        <div class="accessory" draggable="true" data-accessory="👕">👕</div>
+                        <div class="accessory" draggable="true" data-accessory="👗">👗</div>
+                        <div class="accessory" draggable="true" data-accessory="🦺">🦺</div>
+                        <div class="accessory" draggable="true" data-accessory="🧥">🧥</div>
+                        <div class="accessory" draggable="true" data-accessory="👘">👘</div>
+                    </div>
+                </div>
+
+                <div class="accessory-category">
+                    <h3 class="category-title">Accessories</h3>
+                    <div class="accessories-grid">
+                        <div class="accessory" draggable="true" data-accessory="🎒">🎒</div>
+                        <div class="accessory" draggable="true" data-accessory="👜">👜</div>
+                        <div class="accessory" draggable="true" data-accessory="🕶️">🕶️</div>
+                        <div class="accessory" draggable="true" data-accessory="⌚">⌚</div>
+                        <div class="accessory" draggable="true" data-accessory="💍">💍</div>
+                        <div class="accessory" draggable="true" data-accessory="🎸">🎸</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('stickFigureCanvas');
+        const ctx = canvas.getContext('2d');
+        let placedAccessories = [];
+        let draggedAccessory = null;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        // Draw the stick figure
+        function drawStickFigure() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            
+            // Head
+            ctx.beginPath();
+            ctx.arc(200, 80, 30, 0, 2 * Math.PI);
+            ctx.stroke();
+            
+            // Body
+            ctx.beginPath();
+            ctx.moveTo(200, 110);
+            ctx.lineTo(200, 280);
+            ctx.stroke();
+            
+            // Arms
+            ctx.beginPath();
+            ctx.moveTo(200, 170);
+            ctx.lineTo(150, 220);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(200, 170);
+            ctx.lineTo(250, 220);
+            ctx.stroke();
+            
+            // Legs
+            ctx.beginPath();
+            ctx.moveTo(200, 280);
+            ctx.lineTo(160, 350);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(200, 280);
+            ctx.lineTo(240, 350);
+            ctx.stroke();
+            
+            // Redraw placed accessories
+            placedAccessories.forEach(accessory => {
+                ctx.font = '30px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(accessory.emoji, accessory.x, accessory.y);
+            });
+        }
+
+        // Initialize canvas
+        drawStickFigure();
+
+        // Drag and drop functionality
+        document.querySelectorAll('.accessory').forEach(accessory => {
+            accessory.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', e.target.dataset.accessory);
+            });
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const emoji = e.dataTransfer.getData('text/plain');
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            addAccessory(emoji, x, y);
+        });
+
+        // Add accessory function
+        function addAccessory(emoji, x, y) {
+            const accessory = {
+                emoji: emoji,
+                x: x,
+                y: y,
+                id: Date.now() + Math.random()
+            };
+            placedAccessories.push(accessory);
+            drawStickFigure();
+        }
+
+        // Mouse events for moving accessories
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Check if clicking on an accessory
+            for (let i = placedAccessories.length - 1; i >= 0; i--) {
+                const accessory = placedAccessories[i];
+                const distance = Math.sqrt(
+                    Math.pow(mouseX - accessory.x, 2) + 
+                    Math.pow(mouseY - accessory.y, 2)
+                );
+                
+                if (distance < 20) {
+                    draggedAccessory = accessory;
+                    isDragging = true;
+                    dragOffset.x = mouseX - accessory.x;
+                    dragOffset.y = mouseY - accessory.y;
+                    canvas.style.cursor = 'grabbing';
+                    break;
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging && draggedAccessory) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                draggedAccessory.x = mouseX - dragOffset.x;
+                draggedAccessory.y = mouseY - dragOffset.y;
+                drawStickFigure();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggedAccessory = null;
+            canvas.style.cursor = 'crosshair';
+        });
+
+        // Double-click to remove accessory
+        canvas.addEventListener('dblclick', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            for (let i = placedAccessories.length - 1; i >= 0; i--) {
+                const accessory = placedAccessories[i];
+                const distance = Math.sqrt(
+                    Math.pow(mouseX - accessory.x, 2) + 
+                    Math.pow(mouseY - accessory.y, 2)
+                );
+                
+                if (distance < 20) {
+                    placedAccessories.splice(i, 1);
+                    drawStickFigure();
+                    break;
+                }
+            }
+        });
+
+        // Clear canvas function
+        function clearCanvas() {
+            placedAccessories = [];
+            drawStickFigure();
+        }
+
+        // Download image function
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'my-stick-figure.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Share to Twitter function
+        function shareToTwitter() {
+            const imageData = canvas.toDataURL();
+            const text = "Check out my awesome stick figure creation! 🎨✨";
+            const url = "https://stickfigure-dresser.com"; // You'd replace this with your actual URL
+            
+            // Note: Twitter doesn't support direct image sharing via URL parameters
+            // This opens Twitter with text, users can then upload the downloaded image
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text + " #StickFigureArt #Creative")}`;
+            
+            // First download the image
+            downloadImage();
+            
+            // Then open Twitter
+            setTimeout(() => {
+                window.open(twitterUrl, '_blank');
+                alert('Image downloaded! Upload it to your tweet 📸');
+            }, 500);
+        }
+
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        });
+    </script>
+</body>
+</html>
